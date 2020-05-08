@@ -1,0 +1,168 @@
+//
+//  PrefixHeader.pch
+//  GUOWER
+//
+//  Created by ourslook on 2018/6/25.
+//  Copyright © 2018年 Vanne. All rights reserved.
+//
+
+#ifndef PrefixHeader_pch
+#define PrefixHeader_pch
+
+#ifdef __OBJC__
+
+#import "GWNavigationController.h"
+#import "GWAppDelegate.h"
+#import "UIView+Extension.h"
+#import "UIView+Loading.h"
+#import <NSDate+Helper.h>
+#import <ReactiveObjC.h>
+#import <Toast.h>
+#import <PPNetworkHelper.h>
+#import "NSString+Extension.h"
+#import <MJExtension.h>
+#import <UIImageView+WebCache.h>
+#import "NSObject+Base.h"
+#import "UIViewController+CurrentVC.h"
+#import <Masonry.h>
+#import "Header.h"
+#import "URLRequestHelper.h"
+#import "GWAccountMannger.h"
+#import "ZYLoadingImageView.h"
+#import "MMAlertView.h"
+
+/** 打印相关 */
+#if defined(DEBUG)||defined(_DEBUG)
+#define NSLog(...) NSLog(@"%s [第%d行]: \n%@",__func__,__LINE__,[NSString stringWithFormat:__VA_ARGS__])
+#else
+#define NSLog(...)
+#endif
+
+/** 获取主Window */
+#define m_KeyWindow [UIApplication sharedApplication].keyWindow
+/** 获取APP代理 */
+#define m_AppDelegate (GWAppDelegate *)[UIApplication sharedApplication].delegate
+/** 获取屏幕信息 */
+#define m_ScreenW ([[UIScreen mainScreen] respondsToSelector:@selector(nativeBounds)]?[UIScreen mainScreen].nativeBounds.size.width/[UIScreen mainScreen].nativeScale:[UIScreen mainScreen].bounds.size.width)
+#define m_ScreenH ([[UIScreen mainScreen] respondsToSelector:@selector(nativeBounds)]?[UIScreen mainScreen].nativeBounds.size.height/[UIScreen mainScreen].nativeScale:[UIScreen mainScreen].bounds.size.height)
+#define m_ScreenSize ([[UIScreen mainScreen] respondsToSelector:@selector(nativeBounds)]?CGSizeMake([UIScreen mainScreen].nativeBounds.size.width/[UIScreen mainScreen].nativeScale,[UIScreen mainScreen].nativeBounds.size.height/[UIScreen mainScreen].nativeScale):[UIScreen mainScreen].bounds.size)
+#define m_ScreenBounds [UIScreen mainScreen].bounds
+/** 获取导航、状态栏、tabbar高度 */
+#define m_StatusBarHeight [[UIApplication sharedApplication] statusBarFrame].size.height //状态栏高度
+#define m_NavBarHeight 44.0
+#define m_TabBarHeight ([[UIApplication sharedApplication] statusBarFrame].size.height>20?83:49) //底部tabbar高度
+#define m_TopHeight (m_StatusBarHeight + m_NavBarHeight) //整个导航栏高度
+/** 系统版本 */
+#define m_IOS_VERSION [[[UIDevice currentDevice] systemVersion] floatValue]
+/** 是否大于那个版本 */
+#define m_VERSION(value) ((m_IOS_VERSION >= (value)) ? YES : NO)
+/** 颜色值RGB */
+#define m_Color_RGB(r,g,b) [UIColor colorWithRed:r/255.0f green:g/255.0f blue:b/255.0f alpha:1]
+/** 颜色值RGBA */
+#define m_Color_RGBA(r,g,b,a) [UIColor colorWithRed:r/255.0f green:g/255.0f blue:b/255.0f alpha:a]
+/** 灵活灰色 */
+#define m_Color_gray(value) m_Color_RGB(value, value, value)
+/** HEX颜色 */
+#define m_hexColor(hexValue) [UIColor colorWithRed:(((hexValue) & 0xFF0000) >> 16) / 255.0 green:(((hexValue) & 0xFF00) >> 8) / 255.0 blue:(((hexValue) & 0xFF)) / 255.0 alpha:1.0]
+/** 随机色 */
+#define m_Color_randomColor m_Color_RGB(arc4random_uniform(256), arc4random_uniform(256), arc4random_uniform(256))
+/** iPhone 5 5S SE 机型 */
+#define m_IS_IPHONE_5 (fabs((double)[[UIScreen mainScreen]bounds].size.height - (double)568) < DBL_EPSILON)
+/** iPhone 6 6S 7 8 机型 */
+#define m_IS_IPHONE_6 (fabs((double)[[UIScreen mainScreen]bounds].size.height - (double)667) < DBL_EPSILON)
+/** iPhone 6P 7P 8P 机型 */
+#define m_IS_IPHONE_6_PLUS (fabs((double)[[UIScreen mainScreen]bounds].size.height - (double)736) < DBL_EPSILON)
+/** 是否是iPhone X */
+#define m_IS_IPHONE_X ([UIScreen instancesRespondToSelector:@selector(currentMode)] ? CGSizeEqualToSize(CGSizeMake(1125, 2436), [[UIScreen mainScreen] currentMode].size) : NO)
+/** 格式化字符串 */
+#define m_NSStringFormat(format,...) [NSString stringWithFormat:format,##__VA_ARGS__]
+
+/** 校验空字符串并弹出提示 */
+#define m_CheckBlankField(str,hint)\
+if ([NSString ol_isNullOrNilWithObject:str]) {\
+m_ToastCenter(hint);\
+return;\
+}\
+/** 校验是否是身份证并弹出提示 */
+#define m_CheckIdCodeField(str,hint)\
+if (![str va_judgeIdentityStringValid:str]) {\
+m_ToastCenter(hint);\
+return;\
+}\
+/** 校验是否是手机号并弹出提示 */
+#define m_CheckMobileField(str,hint)\
+if (![str va_valiMobile]) {\
+m_ToastCenter(hint);\
+return;\
+}\
+
+/** 校验是否是邮箱并弹出提示 */
+#define m_CheckEmailField(str,hint)\
+if (![str va_validateEmail]) {\
+m_ToastCenter(hint);\
+return;\
+}\
+/** Toast */
+#define m_ToastTop(topStr) m_Toast(topStr,CSToastPositionTop)
+#define m_ToastBottom(bottomStr) m_Toast(bottomStr,CSToastPositionBottom)
+#define m_ToastCenter(centerStr) m_Toast(centerStr,CSToastPositionCenter)
+#define m_Toast(str,toastPosition)  CSToastStyle *style = [[CSToastStyle alloc] initWithDefaultStyle]; \
+style.backgroundColor = [m_Color_gray(51) colorWithAlphaComponent:0.7];\
+style.cornerRadius = 4;\
+style.titleFont = m_FontPF_Regular_WithSize(15);\
+style.messageFont = m_FontPF_Regular_WithSize(15);\
+style.horizontalPadding = 18;\
+style.verticalPadding = 28;\
+[m_KeyWindow makeToast:str duration:2 position:toastPosition style:style];\
+/** 默认图 */
+#define m_Default_head [UIImage imageNamed:@"ol_default_head"]
+/** 正方形默认图 */
+#define m_Default_square [UIImage imageNamed:@"header_200_200"]
+/** 读取本地图片 */
+#define m_LoadImage(file,ext) [UIImage imageWithContentsOfFile:[[NSBundle mainBundle]pathForResource:file ofType:ext]]
+#define m_Image(file) [UIImage imageWithContentsOfFile:[[NSBundle mainBundle] pathForResource:file ofType:nil]]
+/** 存储对象 */
+#define m_UserDefaultSetObjectForKey(__VALUE__,__KEY__) \
+{\
+[[NSUserDefaults standardUserDefaults] setObject:__VALUE__ forKey:__KEY__];\
+[[NSUserDefaults standardUserDefaults] synchronize];\
+}
+/** 获得存储的对象 */
+#define m_UserDefaultObjectForKey(__KEY__) [[NSUserDefaults standardUserDefaults] objectForKey:__KEY__]
+/** delete objects删除对象 */
+#define m_UserDefaultRemoveObjectForKey(__KEY__) \
+{\
+[[NSUserDefaults standardUserDefaults] removeObjectForKey:__KEY__];\
+[[NSUserDefaults standardUserDefaults] synchronize];\
+}
+/** 检查一段代码的执行时间 */
+#define m_TICK NSDate *startTime = [NSDate date];
+#define m_TOCK NSLog(@"执行时间:%f", -[startTime timeIntervalSinceNow]);
+
+#pragma mark -- -- 项目相关
+
+#define GW_NavColor m_Color_RGBA(230, 230, 230, 0.5)
+
+#define GW_ThemeColor m_hexColor(0xf15929)
+
+#define GW_OrangeColor m_hexColor(0xf2693e)
+
+/** 苹方常规 */
+#define m_FontPF_Regular_WithSize(fontSize) [UIFont fontWithName:@"PingfangSC-Regular" size:(fontSize)]
+
+/** 苹方中黑 */
+#define m_FontPF_Medium_WithSize(fontSize) [UIFont fontWithName:@"PingfangSC-Medium" size:(fontSize)]
+
+/** 苹方中粗 */
+#define m_FontPF_Semibold_WithSize(fontSize) [UIFont fontWithName:@"PingFangSC-Semibold" size:(fontSize)]
+
+/** 检测是否登录 */
+#define m_CheckUserLogin \
+if (!AccountMannger_isLogin) {\
+[GWLoginVC gw_showLoginVCWithCompletion:nil];\
+return;\
+}
+
+#endif
+
+#endif /* PrefixHeader_pch */
