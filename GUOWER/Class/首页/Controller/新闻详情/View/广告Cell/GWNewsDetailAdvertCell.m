@@ -2,10 +2,6 @@
 //  GWNewsDetailAdvertCell.m
 //  GUOWER
 //
-//  Created by ourslook on 2018/7/5.
-//  Copyright © 2018年 Vanne. All rights reserved.
-//
-
 #import "GWNewsDetailAdvertCell.h"
 #import <SDAutoLayout.h>
 //imageView
@@ -56,7 +52,7 @@
         [imageView addGestureRecognizer:tap];
         
     }];
-    
+    //kkjhhjnjjnhjhghjjhiijkkkjkjkjnnn
     [self setupAutoHeightWithBottomView:agoView bottomMargin:15];
     
 }
